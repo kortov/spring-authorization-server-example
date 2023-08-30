@@ -1,4 +1,4 @@
-= Samples
+= Samples String Boot 3 Authorization Server 2023
 
 [[default-sample]]
 == Default Sample
