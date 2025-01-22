@@ -1,4 +1,4 @@
-= Samples String Boot 3 Authorization Server 2023
+= Samples Spring Boot 3 Authorization Server 2023
 
 [[default-sample]]
 == Default Sample
@@ -17,7 +17,9 @@ The demo sample provides custom configuration for various features implemented b
 * Run Client -> `./gradlew -b samples/demo-client/samples-demo-client.gradle bootRun`
 * Run Resource Server -> `./gradlew -b samples/messages-resource/samples-messages-resource.gradle bootRun`
 * Go to `http://127.0.0.1:8080`
-** Login with credentials -> user1 \ password
+** Login with credentials -> user \ password
+* Embedded database is located `jdbc:h2:tcp://localhost:9092/mem:testdb` or `http://localhost:9000/h2-console/`
+** Login with credentials -> sa \
 
 [[configuring-social-login]]
 === Configuring Social Login

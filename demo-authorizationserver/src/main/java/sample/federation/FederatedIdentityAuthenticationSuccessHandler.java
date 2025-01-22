@@ -43,7 +43,7 @@ public final class FederatedIdentityAuthenticationSuccessHandler implements Auth
 
 	private final AuthenticationSuccessHandler delegate = new SavedRequestAwareAuthenticationSuccessHandler();
 
-	private Consumer<OAuth2User> oauth2UserHandler = (user) -> {};
+	private final Consumer<OAuth2User> oauth2UserHandler = new UserRepositoryOAuth2UserHandler();
 
 	private Consumer<OidcUser> oidcUserHandler = (user) -> this.oauth2UserHandler.accept(user);
 
@@ -58,14 +58,6 @@ public final class FederatedIdentityAuthenticationSuccessHandler implements Auth
 		}
 
 		this.delegate.onAuthenticationSuccess(request, response, authentication);
-	}
-
-	public void setOAuth2UserHandler(Consumer<OAuth2User> oauth2UserHandler) {
-		this.oauth2UserHandler = oauth2UserHandler;
-	}
-
-	public void setOidcUserHandler(Consumer<OidcUser> oidcUserHandler) {
-		this.oidcUserHandler = oidcUserHandler;
 	}
 
 }

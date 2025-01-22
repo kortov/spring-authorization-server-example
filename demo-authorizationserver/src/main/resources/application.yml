@@ -23,6 +23,11 @@ spring:
             user-name-attribute: email
           github:
             user-name-attribute: login
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
 
 logging:
   level:

@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 // end::imports[]
 
@@ -33,12 +35,13 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 public final class UserRepositoryOAuth2UserHandler implements Consumer<OAuth2User> {
 
 	private final UserRepository userRepository = new UserRepository();
+	private final Log logger = LogFactory.getLog(getClass());
 
 	@Override
 	public void accept(OAuth2User user) {
 		// Capture user in a local data store on first authentication
 		if (this.userRepository.findByName(user.getName()) == null) {
-			System.out.println("Saving first-time user: name=" + user.getName() + ", claims=" + user.getAttributes() + ", authorities=" + user.getAuthorities());
+			this.logger.info("Saving first-time user: name=" + user.getName() + ", claims=" + user.getAttributes() + ", authorities=" + user.getAuthorities());
 			this.userRepository.save(user);
 		}
 	}

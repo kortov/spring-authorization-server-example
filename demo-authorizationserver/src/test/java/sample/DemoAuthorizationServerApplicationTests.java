@@ -17,13 +17,13 @@ package sample;
 
 import java.io.IOException;
 
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.html.HtmlButton;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlInput;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.htmlunit.Page;
+import org.htmlunit.WebClient;
+import org.htmlunit.WebResponse;
+import org.htmlunit.html.HtmlButton;
+import org.htmlunit.html.HtmlElement;
+import org.htmlunit.html.HtmlInput;
+import org.htmlunit.html.HtmlPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class DemoAuthorizationServerApplicationTests {
+class DemoAuthorizationServerApplicationTests {
 	private static final String REDIRECT_URI = "http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc";
 
 	private static final String AUTHORIZATION_REQUEST = UriComponentsBuilder
@@ -68,22 +68,22 @@ public class DemoAuthorizationServerApplicationTests {
 	}
 
 	@Test
-	public void whenLoginSuccessfulThenDisplayBadRequestError() throws IOException {
+	void whenLoginSuccessfulThenDisplayBadRequestError() throws IOException {
 		HtmlPage page = this.webClient.getPage("/");
 
 		assertLoginPage(page);
 
 		this.webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-		WebResponse signInResponse = signIn(page, "user1", "password").getWebResponse();
+		WebResponse signInResponse = signIn(page, "user", "password").getWebResponse();
 
 		assertThat(signInResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());	// there is no "default" index page
 	}
 
 	@Test
-	public void whenLoginFailsThenDisplayBadCredentials() throws IOException {
+	void whenLoginFailsThenDisplayBadCredentials() throws IOException {
 		HtmlPage page = this.webClient.getPage("/");
 
-		HtmlPage loginErrorPage = signIn(page, "user1", "wrong-password");
+		HtmlPage loginErrorPage = signIn(page, "user", "wrong-password");
 
 		HtmlElement alert = loginErrorPage.querySelector("div[role=\"alert\"]");
 		assertThat(alert).isNotNull();
@@ -91,18 +91,18 @@ public class DemoAuthorizationServerApplicationTests {
 	}
 
 	@Test
-	public void whenNotLoggedInAndRequestingTokenThenRedirectsToLogin() throws IOException {
+	void whenNotLoggedInAndRequestingTokenThenRedirectsToLogin() throws IOException {
 		HtmlPage page = this.webClient.getPage(AUTHORIZATION_REQUEST);
 
 		assertLoginPage(page);
 	}
 
 	@Test
-	public void whenLoggingInAndRequestingTokenThenRedirectsToClientApplication() throws IOException {
+	void whenLoggingInAndRequestingTokenThenRedirectsToClientApplication() throws IOException {
 		// Log in
 		this.webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
 		this.webClient.getOptions().setRedirectEnabled(false);
-		signIn(this.webClient.getPage("/login"), "user1", "password");
+		signIn(this.webClient.getPage("/login"), "user", "password");
 
 		// Request token
 		WebResponse response = this.webClient.getPage(AUTHORIZATION_REQUEST).getWebResponse();

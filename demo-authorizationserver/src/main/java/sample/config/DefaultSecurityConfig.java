@@ -15,12 +15,12 @@
  */
 package sample.config;
 
-import sample.federation.FederatedIdentityAuthenticationSuccessHandler;
-
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.User;
@@ -30,6 +30,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import sample.federation.FederatedIdentityAuthenticationSuccessHandler;
 
 /**
  * @author Joe Grandja
@@ -40,53 +41,67 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 @Configuration(proxyBeanMethods = false)
 public class DefaultSecurityConfig {
 
-	// @formatter:off
-	@Bean
-	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-		http
-			.authorizeHttpRequests(authorize ->
-				authorize
-					.requestMatchers("/assets/**", "/webjars/**", "/login").permitAll()
-					.anyRequest().authenticated()
-			)
-			.formLogin(formLogin ->
-				formLogin
-					.loginPage("/login")
-			)
-			.oauth2Login(oauth2Login ->
-				oauth2Login
-					.loginPage("/login")
-					.successHandler(authenticationSuccessHandler())
-			);
+    @Bean
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authorize ->
+                        authorize
+                                .requestMatchers("/assets/**", "/webjars/**", "/login")
+                                .permitAll()
+                                .requestMatchers(PathRequest.toH2Console()).permitAll()
+                                .anyRequest()
+                                .authenticated()
 
-		return http.build();
-	}
+                )
+                .formLogin(formLogin ->
+                        formLogin
+                                .loginPage("/login")
+                )
+                .oauth2Login(oauth2Login ->
+                        oauth2Login
+                                .loginPage("/login")
+                                .successHandler(authenticationSuccessHandler())
+                );
+
+        return http.build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring().requestMatchers("/h2-console/**");
+    }
+
+    private AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new FederatedIdentityAuthenticationSuccessHandler();
+    }
+
+    // @formatter:off
+	@Bean
+    public UserDetailsService users() {
+        UserDetails user = User.builder()
+                .username("user")
+                // password
+                .password("{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW")
+                .roles("USER")
+                .build();
+        UserDetails admin = User.builder()
+                .username("admin")
+                // password
+                .password("{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW")
+                .roles("USER", "ADMIN")
+                .build();
+        return new InMemoryUserDetailsManager(user, admin);
+    }
 	// @formatter:on
 
-	private AuthenticationSuccessHandler authenticationSuccessHandler() {
-		return new FederatedIdentityAuthenticationSuccessHandler();
-	}
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
 
-	// @formatter:off
-	@Bean
-	public UserDetailsService users() {
-		UserDetails user = User.withDefaultPasswordEncoder()
-				.username("user1")
-				.password("password")
-				.roles("USER")
-				.build();
-		return new InMemoryUserDetailsManager(user);
-	}
-	// @formatter:on
-
-	@Bean
-	public SessionRegistry sessionRegistry() {
-		return new SessionRegistryImpl();
-	}
-
-	@Bean
-	public HttpSessionEventPublisher httpSessionEventPublisher() {
-		return new HttpSessionEventPublisher();
-	}
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
 
 }

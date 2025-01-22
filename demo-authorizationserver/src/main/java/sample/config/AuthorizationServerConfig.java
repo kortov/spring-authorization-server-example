@@ -15,12 +15,14 @@
  */
 package sample.config;
 
+import java.sql.SQLException;
 import java.util.UUID;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.h2.tools.Server;
 import sample.authentication.DeviceClientAuthenticationProvider;
 import sample.federation.FederatedIdentityIdTokenCustomizer;
 import sample.jose.Jwks;
@@ -118,7 +120,7 @@ public class AuthorizationServerConfig {
 
 		// @formatter:off
 		http
-			.exceptionHandling((exceptions) -> exceptions
+			.exceptionHandling(exceptions -> exceptions
 				.defaultAuthenticationEntryPointFor(
 					new LoginUrlAuthenticationEntryPoint("/login"),
 					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
@@ -207,7 +209,6 @@ public class AuthorizationServerConfig {
 	public EmbeddedDatabase embeddedDatabase() {
 		// @formatter:off
 		return new EmbeddedDatabaseBuilder()
-				.generateUniqueName(true)
 				.setType(EmbeddedDatabaseType.H2)
 				.setScriptEncoding("UTF-8")
 				.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-schema.sql")
@@ -215,6 +216,11 @@ public class AuthorizationServerConfig {
 				.addScript("org/springframework/security/oauth2/server/authorization/client/oauth2-registered-client-schema.sql")
 				.build();
 		// @formatter:on
+	}
+
+	@Bean(initMethod = "start", destroyMethod = "stop")
+	public Server h2Server() throws SQLException {
+		return Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092");
 	}
 
 }
