@@ -1,4 +1,5 @@
-= Samples Spring Boot 3 Authorization Server 2023
+= Samples Spring Boot 3 Authorization Server 2025
+The origins of samples are located https://github.com/spring-projects/spring-authorization-server/tree/main/samples[here]
 
 [[default-sample]]
 == Default Sample
